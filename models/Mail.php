@@ -21,6 +21,8 @@ use yii\behaviors\TimestampBehavior;
  * @property string $mail_text
  * @property string $mail_html
  * @property integer $mail_status
+ * @property integer $mail_send_try
+ * @property integer $mail_send_last_try
  */
 class Mail extends ActiveRecord
 {
@@ -54,7 +56,7 @@ class Mail extends ActiveRecord
     public function rules()
     {
         return [
-            [['mail_domen_id', 'mail_status'], 'integer'],
+            [['mail_domen_id', 'mail_status', 'mail_send_try', ], 'integer'],
             [['mail_text', 'mail_html'], 'string'],
             [['mail_from', 'mail_fromname', 'mail_to', 'mail_toname'], 'string', 'max' => 255]
         ];
@@ -76,6 +78,8 @@ class Mail extends ActiveRecord
             'mail_text' => 'Текст',
             'mail_html' => 'html',
             'mail_status' => 'Статус',
+            'mail_send_try' => 'Попытки',
+            'mail_send_last_try' => 'Дата последней попытки',
         ];
     }
 }
