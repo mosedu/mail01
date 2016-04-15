@@ -85,11 +85,13 @@ class Domain extends ActiveRecord
      */
     public function rules()
     {
+        mb_internal_encoding('UTF-8');
         return [
             [['domain_name'], 'required', ],
+            [['domain_name'], 'filter', 'filter' => 'mb_strtolower', ],
             [['domain_name'], 'unique', ],
             [['domain_name', 'domain_authkey', ], 'string', 'max' => 255],
-            [['domain_name'], 'match', 'pattern' => '|^[a-z_][-a-z0-9_\\.]+[a-z0-9]$|', ],
+            [['domain_name'], 'match', 'pattern' => '|^[a-zа-яё_][-a-z0-9а-яё_\\.]+\\.[a-zа-яё]+$|u', ],
 
             [['domain_status'], 'integer', ],
             [['domain_status'], 'in', 'range' => array_keys(self::getAllStatuses()), ],

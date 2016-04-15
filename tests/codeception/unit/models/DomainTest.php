@@ -31,8 +31,8 @@ class DomainTest extends TestCase
      * Проверяем пустой объект - не должен пройти валидацию
      */
     public function testValidateReturnsFalseIfParametersAreNotSet() {
-        $user = new Domain;
-        $this->assertFalse($user->validate(), "New Domain should not validate");
+        $domen = new Domain;
+        $this->assertFalse($domen->validate(), "New Domain should not validate");
     }
 
     /**
@@ -42,8 +42,30 @@ class DomainTest extends TestCase
         $configurationParams = [
             'domain_name' => 'valid.name',
         ];
-        $user = new Domain($configurationParams);
-        $this->assertTrue($user->validate(), "User with set parameters should validate");
+        $domen = new Domain($configurationParams);
+        $this->assertTrue($domen->validate(), "Domain with set parameters should validate");
+    }
+
+    /**
+     * Валидное имя - проходит валидацию
+     */
+    public function testValidateReturnsFalseIfNameAreDoesntHaveDot() {
+        $configurationParams = [
+            'domain_name' => 'invalid',
+        ];
+        $domen = new Domain($configurationParams);
+        $this->assertFalse($domen->validate(), "Domain with name without dot should not validate");
+    }
+
+    /**
+     * Валидное имя - проходит валидацию
+     */
+    public function testValidateReturnsTrueIfRussianDimainName() {
+        $configurationParams = [
+            'domain_name' => 'доменЁ.рф',
+        ];
+        $domen = new Domain($configurationParams);
+        $this->assertTrue($domen->validate(), "Domain with russian name should validate");
     }
 
     /**

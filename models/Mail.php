@@ -6,6 +6,7 @@ use Yii;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
 use yii\behaviors\TimestampBehavior;
+use app\components\OnerequareValidator;
 
 
 /**
@@ -56,8 +57,11 @@ class Mail extends ActiveRecord
     public function rules()
     {
         return [
+            [['mail_to', ], 'required', ],
+            [['mail_to', ], 'email', ],
             [['mail_domen_id', 'mail_status', 'mail_send_try', ], 'integer'],
             [['mail_text', 'mail_html'], 'string'],
+            [['mail_text', ], OnerequareValidator::className(), 'anotherAttributes' => ['mail_text', 'mail_html', ], ],
             [['mail_from', 'mail_fromname', 'mail_to', 'mail_toname'], 'string', 'max' => 255]
         ];
     }
