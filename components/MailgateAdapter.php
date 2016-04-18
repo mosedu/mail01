@@ -36,7 +36,7 @@ class MailgateAdapter {
      * @throws \Exception
      */
     public function testInputData($aData = []) {
-        $aReq = ['apikey', 'to', ];
+        $aReq = ['apikey', 'to', 'subject', ];
         foreach( $aReq As $v ) {
             if( !isset($aData[$v]) ) {
                 Yii::info('testInputData: not exists ' . $v);
@@ -59,7 +59,7 @@ class MailgateAdapter {
         $apost = [
             'mail_to' => $aData['to'],
         ];
-        foreach(['text', 'html', 'from', 'fromname'] As $v) {
+        foreach(['text', 'html', 'from', 'fromname', 'subject'] As $v) {
             if( isset($aData[$v]) ) {
                 $apost['mail_' . $v] = $aData[$v];
             }

@@ -24,6 +24,7 @@ use app\components\OnerequareValidator;
  * @property integer $mail_status
  * @property integer $mail_send_try
  * @property integer $mail_send_last_try
+ * @property string $mail_subject
  */
 class Mail extends ActiveRecord
 {
@@ -57,7 +58,7 @@ class Mail extends ActiveRecord
     public function rules()
     {
         return [
-            [['mail_to', ], 'required', ],
+            [['mail_to', 'mail_subject', ], 'required', ],
             [['mail_to', ], 'email', ],
             [['mail_domen_id', 'mail_status', 'mail_send_try', ], 'integer'],
             [['mail_text', 'mail_html'], 'string'],
@@ -79,6 +80,7 @@ class Mail extends ActiveRecord
             'mail_fromname' => 'От',
             'mail_to' => 'Кому',
             'mail_toname' => 'Кому',
+            'mail_subject' => 'Тема',
             'mail_text' => 'Текст',
             'mail_html' => 'html',
             'mail_status' => 'Статус',

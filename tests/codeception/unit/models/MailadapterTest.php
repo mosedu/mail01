@@ -29,7 +29,12 @@ class MailadapterTest extends TestCase
      */
     public function testSendReturnsTrueIfMinimalData() {
         $ob = new MailgateAdapter();
-        $sRet = $ob->send(['to' => 'test@mail.ru', 'text' => 'text mail', 'apikey' => '333222111']);
+        $sRet = $ob->send([
+            'to' => 'test@mail.ru',
+            'text' => 'text mail',
+            'subject' => 'test subject',
+            'apikey' => '333222111',
+        ]);
         Yii::info('Retirn send: ' . print_r($sRet, true));
         $this->assertTrue(strlen($sRet) > 2, 'return should be more then 0');
         $aRet = json_decode($sRet, true);
