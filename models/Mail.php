@@ -58,7 +58,7 @@ class Mail extends ActiveRecord
     public function rules()
     {
         return [
-            [['mail_to', 'mail_subject', ], 'required', ],
+            [['mail_to', 'mail_subject', 'mail_domen_id', ], 'required', ],
             [['mail_to', ], 'email', ],
             [['mail_domen_id', 'mail_status', 'mail_send_try', ], 'integer'],
             [['mail_text', 'mail_html'], 'string'],

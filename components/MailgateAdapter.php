@@ -8,19 +8,22 @@
 
 namespace app\components;
 
-use yii;
-
 class MailgateAdapter {
 
+    /** @var string адрес по которому пихаем данные */
     public $url = 'http://mail01.dev/1/mail';
+
+    /** @var array  */
+    public $responseHeaders = [];
 
     /**
      * @param array $aData
-     *     'apikey' ключик для апи, определяет домен, для которого работает отправка писем, обязательный параметр
-     *     'to'     email кому письмо, обязательный параметр
-     *     'text'   plain текст письма, обязательный параметр, необходим или text, или html, или оба
-     *     'html'   html текст письма
-     *     'toname' имя кому, не обязательно
+     *     'domainkey'  ключик для апи, определяет домен, для которого работает отправка писем, обязательный параметр
+     *     'to'      email кому письмо, обязательный параметр
+     *     'subject' тема, обязательный параметр
+     *     'text'    plain текст письма, обязательный параметр, необходим или text, или html, или оба
+     *     'html'    html текст письма
+     *     'toname'  имя кому, не обязательно
      * @return array
      */
 
@@ -30,22 +33,20 @@ class MailgateAdapter {
     }
 
     /**
-     * Проверяем входняе данные
+     * Проверяем входные данные
      *
      * @param array $aData
      * @throws \Exception
      */
     public function testInputData($aData = []) {
-        $aReq = ['apikey', 'to', 'subject', ];
+        $aReq = ['domainkey', 'to', 'subject', ];
         foreach( $aReq As $v ) {
             if( !isset($aData[$v]) ) {
-                Yii::info('testInputData: not exists ' . $v);
                 throw new \Exception('Not found required parameter "'.$v.'"');
             }
         }
 
         if( !isset($aData['text']) && !isset($aData['html']) ) {
-            Yii::info('testInputData: not exists text or html');
             throw new \Exception('Not found required parameter "text" or "html"');
         }
     }
@@ -56,14 +57,16 @@ class MailgateAdapter {
      * @return string
      */
     public function sendByFile($aData, $aHeaders = []) {
-        $apost = [
-            'mail_to' => $aData['to'],
-        ];
-        foreach(['text', 'html', 'from', 'fromname', 'subject'] As $v) {
+        $apost = [];
+
+        foreach(['to', 'text', 'html', 'from', 'fromname', 'subject'] As $v) {
             if( isset($aData[$v]) ) {
                 $apost['mail_' . $v] = $aData[$v];
+                unset($aData[$v]);
             }
         }
+
+        $apost = array_merge($apost, $aData);
 
         $aOpt = [
             'method' => 'POST',
@@ -71,16 +74,25 @@ class MailgateAdapter {
                        . 'Accept: application/json; q=1.0, */*; q=0.1' . "\r\n",
             'content' => http_build_query($apost),
 //            'max_redirects' => '0',
-//            'ignore_errors' => '1'
+            'ignore_errors' => '1',
         ];
 
-        \Yii::info('sendByFile: aOpt = ' . print_r($aOpt, true));
         $result = file_get_contents(
             $this->url,
             false,
             stream_context_create(['http' => $aOpt])
         );
 
+        $this->responseHeaders = $http_response_header;
+
         return $result;
+    }
+
+    /**
+     * Получаем заголовки ответа
+     * @return array
+     */
+    public function getResponseHeaders() {
+        return $this->responseHeaders;
     }
 }

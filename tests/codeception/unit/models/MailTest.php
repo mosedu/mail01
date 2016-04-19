@@ -38,10 +38,11 @@ class MailTest extends TestCase
             $nErrFields++;
         }
 
-        $this->assertEquals($nErrFields, 3, "3 fields should have errors: mail_to, mail_subject and mail_text");
+        $this->assertEquals($nErrFields, 4, "4 fields should have errors: mail_to, mail_subject and mail_text");
         $this->assertTrue(isset($aErrors['mail_to']), "New Mail should has 'mail_to' field");
         $this->assertTrue(isset($aErrors['mail_text']), "New Mail should has 'mail_text' field");
         $this->assertTrue(isset($aErrors['mail_subject']), "New Mail should has 'mail_subject' field");
+        $this->assertTrue(isset($aErrors['mail_domen_id']), "New Mail should has 'mail_domen_id' field");
     }
 
     /**
@@ -96,6 +97,7 @@ class MailTest extends TestCase
             'mail_to' => 'test@mail.ru',
             'mail_text' => 'test text',
             'mail_subject' => 'test subject',
+            'mail_domen_id' => 1,
         ];
         $oMail = new Mail($configurationParams);
         $this->assertTrue($oMail->validate(), "Mail with correct data should validate");
