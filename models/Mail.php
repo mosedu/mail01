@@ -6,7 +6,10 @@ use Yii;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
 use yii\behaviors\TimestampBehavior;
+
 use app\components\OnerequareValidator;
+use app\models\MailHeader;
+use app\components\MailheaderBehavior;
 
 
 /**
@@ -28,6 +31,7 @@ use app\components\OnerequareValidator;
  */
 class Mail extends ActiveRecord
 {
+    public $mailHeaders = [];
     /**
      * @return array
      */
@@ -39,6 +43,10 @@ class Mail extends ActiveRecord
                     ActiveRecord::EVENT_BEFORE_INSERT => ['mail_createtime'],
                 ],
                 'value' => new Expression('NOW()'),
+            ],
+
+            [
+                'class' => MailheaderBehavior::className(),
             ],
 
         ];
@@ -63,7 +71,8 @@ class Mail extends ActiveRecord
             [['mail_domen_id', 'mail_status', 'mail_send_try', ], 'integer'],
             [['mail_text', 'mail_html'], 'string'],
             [['mail_text', ], OnerequareValidator::className(), 'anotherAttributes' => ['mail_text', 'mail_html', ], ],
-            [['mail_from', 'mail_fromname', 'mail_to', 'mail_toname'], 'string', 'max' => 255]
+            [['mail_from', 'mail_fromname', 'mail_to', 'mail_toname'], 'string', 'max' => 255],
+            [['mailHeaders', ], 'testHeaders', ],
         ];
     }
 
@@ -86,6 +95,43 @@ class Mail extends ActiveRecord
             'mail_status' => 'Статус',
             'mail_send_try' => 'Попытки',
             'mail_send_last_try' => 'Дата последней попытки',
+            'mailHeaders' => 'Дополнительные заголовки',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getHeaders() {
+        return $this->hasOne(
+            MailHeader::className(),
+            ['mhead_mail_id' => 'mail_id']
+        );
+    }
+
+    /**
+     * @param string $attribute
+     * @param array $params
+     */
+    public function testHeaders($attribute, $params) {
+        $aHeaderList = [];
+        $aHeaderNames = MailHeader::getAvailableHeaders();
+        $aHeaderNames = array_combine(array_map('strtolower', $aHeaderNames), $aHeaderNames);
+        $bSetHeader = true;
+
+        foreach($this->$attribute As $k=>$v) {
+            $sName = strtolower($k);
+            if( !isset($aHeaderNames[$sName]) ) {
+                $this->addError($attribute, $attribute . ' has not available header ' . $k);
+                $bSetHeader = false;
+            }
+            else {
+                $aHeaderList[$aHeaderNames[$sName]] = $v;
+            }
+        }
+
+        if( $bSetHeader ) {
+            $this->$attribute = $aHeaderList;
+        }
     }
 }

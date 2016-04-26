@@ -6,6 +6,7 @@ use yii\codeception\TestCase;
 use yii\db\Expression;
 
 use app\modules\api1\models\Mail;
+use app\models\MailHeader;
 use app\tests\codeception\unit\fixtures\MailFixture;
 
 class MailTest extends TestCase
@@ -101,6 +102,44 @@ class MailTest extends TestCase
         ];
         $oMail = new Mail($configurationParams);
         $this->assertTrue($oMail->validate(), "Mail with correct data should validate");
+    }
+
+    /**
+     * Добавление невалидного заголовка не проходит валидацию
+     */
+    public function testValidateReturnsFalseIfHasUnavailableHeader() {
+        $sBadHeaderName = 'errormailheader';
+
+        $configurationParams = [
+            'mail_to' => 'test@mail.ru',
+            'mail_text' => 'test text',
+            'mail_subject' => 'test subject',
+            'mail_domen_id' => 1,
+            'mailHeaders' => [
+                'cc' => 'test@example.com',
+                $sBadHeaderName => 'test',
+                'Priority' => 3,
+            ],
+        ];
+
+        $oMail = new Mail($configurationParams);
+        $this->assertFalse($oMail->validate(), "Mail with incorrect header should not validate");
+
+        $aErr = $oMail->getErrors();
+
+        // должна появиться ошибка о поле заголовков
+        $this->assertTrue(isset($aErr['mailHeaders']), "Mail error should has field mailHeaders");
+
+        // должен появиться в ошибках плохой заголовок
+        $this->assertTrue(array_reduce($aErr['mailHeaders'], function($carry, $el) use($sBadHeaderName) { return $carry || (strpos($el, $sBadHeaderName) !== false); }, false), "Mail error should has error about '{$sBadHeaderName}'");
+
+        // не должно быть в ошибках допустимых заголовков
+        $aGoodHeaders = MailHeader::getAvailableHeaders();
+        foreach($aGoodHeaders As $v) {
+            $v = strtolower($v);
+            $this->assertFalse(array_reduce($aErr['mailHeaders'], function($carry, $el) use($v) { return $carry || (strpos($el, 'has not available header ' . $v) !== false); }, false), "Mail error should has not error about '{$v}' : ERROR = " . print_r($aErr, true));
+        }
+//        \Yii::info('oMail->getErrors() = ' . print_r($oMail->getErrors(), true));
     }
 
 

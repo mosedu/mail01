@@ -89,7 +89,7 @@ class DomainAuthBehavior extends Behavior {
                     throw new ForbiddenHttpException('Domain not found for api key ' . $val);
                 }
 
-                Yii::info('setControllerDomain(): ob = ' . $ob->domain_id);
+                Yii::info('setControllerDomain(): domain_id = ' . $ob->domain_id);
 
                 if( count($this->modelDomainFields) > 0 ) {
                     // заполняем поля для домена
@@ -117,7 +117,7 @@ class DomainAuthBehavior extends Behavior {
                     $params[$k] = $domain->$v;
                 }
                 else if( $v instanceof \Closure ) {
-                    $params[$k] = $v($domain);
+                    $params[$k] = $v($domain, $params);
                 }
             }
             $request->setBodyParams($params);

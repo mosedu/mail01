@@ -7,22 +7,42 @@ use yii\codeception\TestCase;
 
 use app\components\MailgateAdapter;
 
+/**
+ *
+ * Это плохие тесты, потому что они тестирую не отдельные кусочки, но пока они живут тут
+ *
+ */
+
 class MailadapterTest extends TestCase
 {
-    public function _before()
+    /**
+     *
+     */
+    public static function setUpBeforeClass()
     {
         $sCommand = "d:\\projects\\mysql-5.5.42\\bin\\mysql.exe -u root mail_gate < d:\\projects\\web\\mail01\\tests\\codeception\\unit\\fixtures\\data\\domains.sql";
-        echo "\n\n" . $sCommand . "\n\n";
-//        Yii::info('sCommand = ' . $sCommand);
-        exec($sCommand);
+        Yii::info('MailadapterTest setUpBeforeClass(): ' . $sCommand);
+//        parent::setUpBeforeClass();
+        $sRet = exec($sCommand, $aPrint, $nRetVal);
+        Yii::info('MailadapterTest setUpBeforeClass(): sRet = ' . $sRet . ' aPrint = ' . implode("\n", $aPrint) . ' nRetVal = ' . $nRetVal);
     }
 
-    protected function setUp()
-    {
-        parent::setUp();
-        $sCommand = "d:\\projects\\mysql-5.5.42\\bin\\mysql.exe -u root mail_gate < d:\\projects\\web\\mail01\\tests\\codeception\\unit\\fixtures\\data\\domains.sql";
-        echo "\n\n" . $sCommand . "\n\n";
-    }
+//    public function _before()
+//    {
+//        $sCommand = "d:\\projects\\mysql-5.5.42\\bin\\mysql.exe -u root mail_gate < d:\\projects\\web\\mail01\\tests\\codeception\\unit\\fixtures\\data\\domains.sql";
+//        Yii::info('MailadapterTest : _before(): ' . $sCommand);
+//        $sRet = exec($sCommand, $aPrint, $nRetVal);
+//        Yii::info('MailadapterTest : sRet = ' . $sRet . ' aPrint = ' . implode("\n", $aPrint) . ' nRetVal = ' . $nRetVal);
+//    }
+
+//    protected function setUp()
+//    {
+//        $sCommand = "d:\\projects\\mysql-5.5.42\\bin\\mysql.exe -u root mail_gate < d:\\projects\\web\\mail01\\tests\\codeception\\unit\\fixtures\\data\\domains.sql";
+//        Yii::info('MailadapterTest setUp(): ' . $sCommand);
+//        parent::setUp();
+//        $sRet = exec($sCommand, $aPrint, $nRetVal);
+//        Yii::info('MailadapterTest setUp(): sRet = ' . $sRet . ' aPrint = ' . implode("\n", $aPrint) . ' nRetVal = ' . $nRetVal);
+//    }
 
     /**
      * Проверяем пустой массив - должно быть исключение
@@ -34,7 +54,7 @@ class MailadapterTest extends TestCase
     }
 
     /**
-     * Проверяем минимальный массив - должно пройти
+     * Проверяем невалидный ключик
      */
     public function testSendReturnsFalseIfIncorrectKey() {
         $ob = new MailgateAdapter();
@@ -53,7 +73,7 @@ class MailadapterTest extends TestCase
     }
 
     /**
-     * Проверяем минимальный массив - должно пройти
+     * Проверяем валидный ключик
      */
     public function testSendReturnsTrueIfMinimalData() {
         $ob = new MailgateAdapter();
@@ -68,6 +88,25 @@ class MailadapterTest extends TestCase
         $aRet = json_decode($sRet, true);
         $this->assertTrue($aRet !== null, 'return should be decoded json');
         $this->assertTrue($aRet['mail_id'] && ($aRet['mail_id'] > 0), 'return should has id for new accepted mail');
+        \Yii::info('Headers: ' . print_r($ob->getResponseHeaders(), true));
+    }
+
+    /**
+     * Проверяем заблокированный домен
+     */
+    public function testSendReturnsFalseIfBlockedDomain() {
+        $ob = new MailgateAdapter();
+        $sRet = $ob->send([
+            'to' => 'test@mail.ru',
+            'text' => 'text mail',
+            'subject' => 'test subject',
+            'domainkey' => 'apikey-blocked',
+        ]);
+        Yii::info('Return send: ' . print_r($sRet, true));
+        $this->assertTrue(strlen($sRet) > 2, 'return should be more then 0');
+        $aRet = json_decode($sRet, true);
+        $this->assertTrue($aRet !== null, 'return should be decoded json');
+        $this->assertTrue(isset($aRet['status']) && ($aRet['status'] == 403), 'return should has fobbiden status');
         \Yii::info('Headers: ' . print_r($ob->getResponseHeaders(), true));
     }
 
