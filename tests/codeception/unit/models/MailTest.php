@@ -142,5 +142,39 @@ class MailTest extends TestCase
 //        \Yii::info('oMail->getErrors() = ' . print_r($oMail->getErrors(), true));
     }
 
+    /**
+     * Сохранение письма с валидными заголовками
+     */
+    public function testSaveReturnsTrueIfHasAvailableHeaders() {
+
+        $configurationParams = [
+            'mail_to' => 'test@mail.ru',
+            'mail_text' => 'test text',
+            'mail_subject' => 'test subject',
+            'mail_domen_id' => 1,
+            'mailHeaders' => [
+                'cc' => 'test@example.com',
+                'Priority' => 3,
+            ],
+        ];
+
+        $oMail = new Mail($configurationParams);
+        $this->assertTrue($oMail->save(), "Mail with correct header should save");
+
+        $aErr = $oMail->getErrors();
+
+        $this->assertTrue(count($aErr) == 0, "Mail should has not errors");
+
+        $model = Mail::findOne($oMail->mail_id);
+        $oHeaders = $model->headers;
+
+        $this->assertTrue($oHeaders !== null, 'Model should has headers');
+        $this->assertTrue(is_array($oHeaders->getHeaderValue()), 'Headers should be an array');
+        $this->assertTrue(count($oHeaders->getHeaderValue()) == 2, 'Headers should has 2 elements');
+        $this->assertTrue($oHeaders->getHeaderValue('Cc') == 'test@example.com', 'Headers should has Cc element');
+        $this->assertTrue($oHeaders->getHeaderValue('Priority') == 3, 'Headers should has Priority element');
+
+    }
+
 
 }

@@ -14,6 +14,7 @@ use Yii;
  */
 class MailHeader extends \yii\db\ActiveRecord
 {
+    public $_headers = null;
     /**
      * @inheritdoc
      */
@@ -73,11 +74,15 @@ class MailHeader extends \yii\db\ActiveRecord
 
 
     /**
-     * @param string $sHeadeName
+     * @param string $sHeaderName
+     * @param string $sDefault
      * @return string
      */
-    public function getHeaderValue($sHeadeName = '') {
-        return '';
+    public function getHeaderValue($sHeaderName = '', $sDefault = null) {
+        if( $this->_headers === null ) {
+            $this->_headers = unserialize($this->mhead_headers);
+        }
+        return empty($sHeaderName) ? $this->_headers : (isset($this->_headers[$sHeaderName]) ? $this->_headers[$sHeaderName] : $sDefault);
     }
 
 }

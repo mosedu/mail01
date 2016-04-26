@@ -33,11 +33,16 @@ class MailheaderBehavior extends Behavior {
         /** @var Mail $model */
         $model = $event->sender;
 
-        $oHeaders = new MailHeader();
-        $oHeaders->attributes = [
-            'mhead_mail_id' => $model->mail_id,
-            'mhead_headers' => serialize($model->mailHeaders),
-        ];
+        if( !empty($model->mailHeaders) ) {
+            $oHeaders = new MailHeader();
+            $oHeaders->attributes = [
+                'mhead_mail_id' => $model->mail_id,
+                'mhead_headers' => serialize($model->mailHeaders),
+            ];
+            if( !$oHeaders->save() ) {
+                Yii::error('Error save headers for mail ['.$model->mail_id.']: ' . print_r($oHeaders->getErrors(), true));
+            }
+        }
     }
 
 }
