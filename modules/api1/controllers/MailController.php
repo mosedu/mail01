@@ -14,6 +14,7 @@ class MailController extends ActiveController
     public function behaviors() {
         $behaviors = parent::behaviors();
 
+        // мы можем еще передать в параметрах заголовки для письма и вставить их в поле mailHeaders модели письма
         $behaviors['domainauth'] = [
             'class' => DomainAuthBehavior::className(),
             'modelDomainFields' => [
