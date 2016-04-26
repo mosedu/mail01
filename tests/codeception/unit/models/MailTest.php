@@ -11,6 +11,21 @@ use app\tests\codeception\unit\fixtures\MailFixture;
 
 class MailTest extends TestCase
 {
+
+    /**
+     *
+     */
+    public static function setUpBeforeClass()
+    {
+        parent::setUpBeforeClass();
+
+//        $sCommand = "d:\\projects\\mysql-5.5.42\\bin\\mysql.exe -u root -e 'Delete From " . Mail::getTableSchema()->fullName . " Where domain_id > 0;' mail_gate";
+        $sCommand = "d:\\projects\\mysql-5.5.42\\bin\\mysql.exe -u root -e 'Delete From mgate_mail Where mail_id > 0;' mail_gate";
+        Yii::info('DomainTest setUpBeforeClass(): ' . $sCommand);
+        $sRet = exec($sCommand, $aPrint, $nRetVal);
+        Yii::info('DomainTest setUpBeforeClass(): sRet = ' . $sRet . ' aPrint = ' . implode("\n", $aPrint) . ' nRetVal = ' . $nRetVal);
+    }
+
 //    public function fixtures()
 //    {
 //        return [

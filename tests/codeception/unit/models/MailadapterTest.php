@@ -21,9 +21,15 @@ class MailadapterTest extends TestCase
      */
     public static function setUpBeforeClass()
     {
+//        parent::setUpBeforeClass();
         $sCommand = "d:\\projects\\mysql-5.5.42\\bin\\mysql.exe -u root mail_gate < d:\\projects\\web\\mail01\\tests\\codeception\\unit\\fixtures\\data\\domains.sql";
         Yii::info('MailadapterTest setUpBeforeClass(): ' . $sCommand);
-//        parent::setUpBeforeClass();
+        $sRet = exec($sCommand, $aPrint, $nRetVal);
+        Yii::info('MailadapterTest setUpBeforeClass(): sRet = ' . $sRet . ' aPrint = ' . implode("\n", $aPrint) . ' nRetVal = ' . $nRetVal);
+
+//        $sCommand = "d:\\projects\\mysql-5.5.42\\bin\\mysql.exe -u root -e 'Delete From " . Mail::getTableSchema()->fullName . " Where domain_id > 0;' mail_gate";
+        $sCommand = "d:\\projects\\mysql-5.5.42\\bin\\mysql.exe -u root -e \"Delete From mgate_mail Where mail_id > 0;\" mail_gate";
+        Yii::info('MailadapterTest setUpBeforeClass(): ' . $sCommand);
         $sRet = exec($sCommand, $aPrint, $nRetVal);
         Yii::info('MailadapterTest setUpBeforeClass(): sRet = ' . $sRet . ' aPrint = ' . implode("\n", $aPrint) . ' nRetVal = ' . $nRetVal);
     }

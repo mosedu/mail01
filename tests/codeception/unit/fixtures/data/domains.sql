@@ -18,10 +18,13 @@
 
 LOCK TABLES `mgate_domain` WRITE;
 /*!40000 ALTER TABLE `mgate_domain` DISABLE KEYS */;
+
 Delete From `mgate_domain` Where domain_id > 0;
-INSERT INTO `mgate_domain` VALUES (1,'2016-04-19 17:22:22','blocked.ru',2,'apikey-blocked','2016-04-19 17:22:22'),
-(2,'2016-04-19 17:22:22','active.ru',1,'apikey-active','2016-04-19 17:22:22'),
-(3,'2016-04-20 17:22:22','another.ru',1,'apikey-another','2016-04-20 17:22:22');
+
+INSERT INTO `mgate_domain` VALUES
+(1,'2016-04-19 17:22:22','blocked.ru',2,'apikey-blocked','2016-04-19 17:22:22','mail@blocked.ru','Blocked User'),
+(2,'2016-04-19 17:22:22','active.ru',1,'apikey-active','2016-04-19 17:22:22','mail@active.ru','Active User'),
+(3,'2016-04-20 17:22:22','another.ru',1,'apikey-another','2016-04-20 17:22:22','mail@another.ru','Another User');
 /*!40000 ALTER TABLE `mgate_domain` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

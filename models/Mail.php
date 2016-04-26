@@ -6,6 +6,7 @@ use Yii;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
 use yii\behaviors\TimestampBehavior;
+use yii\behaviors\AttributeBehavior;
 
 use app\components\OnerequareValidator;
 use app\models\MailHeader;
@@ -31,6 +32,10 @@ use app\components\MailheaderBehavior;
  */
 class Mail extends ActiveRecord
 {
+    const MAIL_STATUS_WAITING = 0;
+    const MAIL_STATUS_SENDED = 1;
+    const MAIL_STATUS_FAILED = 2;
+
     public $mailHeaders = [];
     /**
      * @return array
@@ -43,6 +48,22 @@ class Mail extends ActiveRecord
                     ActiveRecord::EVENT_BEFORE_INSERT => ['mail_createtime'],
                 ],
                 'value' => new Expression('NOW()'),
+            ],
+
+            [
+                'class' => AttributeBehavior::className(),
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['mail_send_try'],
+                ],
+                'value' => 0,
+            ],
+
+            [
+                'class' => AttributeBehavior::className(),
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['mail_status'],
+                ],
+                'value' => self::MAIL_STATUS_WAITING,
             ],
 
             [

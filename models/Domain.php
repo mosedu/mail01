@@ -18,6 +18,8 @@ use yii\base\Event;
  * @property integer $domain_status
  * @property integer $domain_authkey
  * @property integer $domain_authkey_updated
+ * @property string $domain_mail_from
+ * @property string $domain_mail_fromname
  */
 class Domain extends ActiveRecord
 {
@@ -87,14 +89,15 @@ class Domain extends ActiveRecord
     {
         mb_internal_encoding('UTF-8');
         return [
-            [['domain_name'], 'required', ],
-            [['domain_name'], 'filter', 'filter' => 'mb_strtolower', ],
-            [['domain_name'], 'unique', ],
-            [['domain_name', 'domain_authkey', ], 'string', 'max' => 255],
-            [['domain_name'], 'match', 'pattern' => '|^[a-zа-яё_][-a-z0-9а-яё_\\.]+\\.[a-zа-яё]+$|u', ],
+            [['domain_name', 'domain_mail_from', ], 'required', ],
+            [['domain_name', 'domain_mail_from', ], 'filter', 'filter' => 'mb_strtolower', ],
+            [['domain_name', ], 'unique', ],
+            [['domain_mail_from', ], 'email', ],
+            [['domain_name', 'domain_authkey', 'domain_mail_from', 'domain_mail_fromname', ], 'string', 'max' => 255],
+            [['domain_name', ], 'match', 'pattern' => '|^[a-zа-яё_][-a-z0-9а-яё_\\.]+\\.[a-zа-яё]+$|u', ],
 
-            [['domain_status'], 'integer', ],
-            [['domain_status'], 'in', 'range' => array_keys(self::getAllStatuses()), ],
+            [['domain_status', ], 'integer', ],
+            [['domain_status', ], 'in', 'range' => array_keys(self::getAllStatuses()), ],
         ];
     }
 
@@ -110,6 +113,8 @@ class Domain extends ActiveRecord
             'domain_status' => 'Статус',
             'domain_authkey' => 'Ключ',
             'domain_authkey_updated' => 'Изменение ключа',
+            'domain_mail_from' => 'Email От',
+            'domain_mail_fromname' => 'Имя От',
         ];
     }
 
