@@ -7,9 +7,11 @@ use yii\db\ActiveRecord;
 use yii\db\Expression;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\AttributeBehavior;
+use yii\swiftmailer\Message;
 
 use app\components\OnerequareValidator;
 use app\models\MailHeader;
+use app\models\Domain;
 use app\components\MailheaderBehavior;
 
 
@@ -131,6 +133,16 @@ class Mail extends ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDomain() {
+        return $this->hasOne(
+            Domain::className(),
+            ['domain_id' => 'mail_domen_id']
+        );
+    }
+
+    /**
      * @param string $attribute
      * @param array $params
      */
@@ -154,5 +166,27 @@ class Mail extends ActiveRecord
         if( $bSetHeader ) {
             $this->$attribute = $aHeaderList;
         }
+    }
+
+
+    /**
+     * @param Message $oMail
+     */
+    public function setMailHeaders(&$oMail) {
+        $oMsg = $oMail->getSwiftMessage();
+        $headers = $oMsg->getHeaders();
+
+        $headers->addTextHeader('Precedence', 'bulk');
+        $headers->addTextHeader('Auto-Submitted', 'auto-generated');
+
+        $email = $this->domain->domain_mail_from;
+        $site = Yii::$app->params['hostname'];
+
+        if( $email !== '' ) {
+            $headers->addTextHeader('Error-to', '<' . $email . '>');
+            $headers->addTextHeader('List-Owner', '<' . $email . '>');
+            $headers->addTextHeader('List-Unsubscribe', '<mailto:' . $email . '>,<http://' . $site .'/unsubscribe/' . $this->mail_id . '>');
+        }
+
     }
 }
