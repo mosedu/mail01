@@ -12,6 +12,7 @@ use yii\swiftmailer\Message;
 use app\components\OnerequareValidator;
 use app\models\MailHeader;
 use app\models\Domain;
+use app\models\Maillog;
 use app\components\MailheaderBehavior;
 
 
@@ -39,6 +40,7 @@ class Mail extends ActiveRecord
     const MAIL_STATUS_FAILED = 2;
 
     public $mailHeaders = [];
+
     /**
      * @return array
      */
@@ -139,6 +141,16 @@ class Mail extends ActiveRecord
         return $this->hasOne(
             Domain::className(),
             ['domain_id' => 'mail_domen_id']
+        );
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMaillog() {
+        return $this->hasOne(
+            Maillog::className(),
+            ['mlog_mail_id' => 'mail_id']
         );
     }
 

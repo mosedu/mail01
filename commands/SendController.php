@@ -13,6 +13,7 @@ use yii\swiftmailer\Message;
 use yii\db\Expression;
 
 use app\models\Mail;
+use app\models\Maillog;
 
 /**
  *
@@ -44,6 +45,13 @@ class SendController extends Controller
             ->with(['headers', 'domain',])
             ->limit(100)
             ->all();
+
+        // To use the ArrayLogger
+        $logger = new \Swift_Plugins_Loggers_ArrayLogger();
+        /** @var \Swift_Mailer $oSwiftmailer */
+        $oSwiftmailer = Yii::$app->mailer->getSwiftMailer();
+        $oSwiftmailer->registerPlugin(new \Swift_Plugins_LoggerPlugin($logger));
+
         foreach($a As $model) {
             /** @var Mail $model */
             /** @var Message $oMessage */
@@ -97,6 +105,9 @@ class SendController extends Controller
             if( !$model->save() ) {
                 Yii::error('Error save mail data: ' . print_r($model->getErrors(), true) . ' attributes = ' . print_r($model->attributes, true));
             }
+            $sLog = $logger->dump();
+            $logger->clear();
+            Maillog::addLogString($model->mail_id, $sLog, Maillog::MAILLOG_TYPE_SEND);
         }
     }
 
