@@ -32,6 +32,8 @@ use app\components\MailheaderBehavior;
  * @property integer $mail_send_try
  * @property integer $mail_send_last_try
  * @property string $mail_subject
+ * @property string $mail_mta_id
+ * @property string $logs
  */
 class Mail extends ActiveRecord
 {
@@ -40,6 +42,8 @@ class Mail extends ActiveRecord
     const MAIL_STATUS_FAILED = 2;
 
     public $mailHeaders = [];
+
+    public $logs = [];
 
     /**
      * @return array
@@ -96,7 +100,7 @@ class Mail extends ActiveRecord
             [['mail_domen_id', 'mail_status', 'mail_send_try', ], 'integer'],
             [['mail_text', 'mail_html'], 'string'],
             [['mail_text', ], OnerequareValidator::className(), 'anotherAttributes' => ['mail_text', 'mail_html', ], ],
-            [['mail_from', 'mail_fromname', 'mail_to', 'mail_toname'], 'string', 'max' => 255],
+            [['mail_from', 'mail_fromname', 'mail_to', 'mail_toname', 'mail_mta_id', ], 'string', 'max' => 255],
             [['mailHeaders', ], 'testHeaders', ],
         ];
     }
@@ -121,6 +125,8 @@ class Mail extends ActiveRecord
             'mail_send_try' => 'Попытки',
             'mail_send_last_try' => 'Дата последней попытки',
             'mailHeaders' => 'Дополнительные заголовки',
+            'mail_mta_id' => 'MTA Id',
+            'logs' => 'Логи',
         ];
     }
 
@@ -148,10 +154,29 @@ class Mail extends ActiveRecord
      * @return \yii\db\ActiveQuery
      */
     public function getMaillog() {
-        return $this->hasOne(
+        return $this->hasMany(
             Maillog::className(),
             ['mlog_mail_id' => 'mail_id']
         );
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus() {
+        $aStatus = self::getAllStatuses();
+        return isset($aStatus[$this->mail_status]) ? $aStatus[$this->mail_status] : '???';
+    }
+
+    /**
+     * @return array
+     */
+    public static function getAllStatuses() {
+        return [
+            self::MAIL_STATUS_WAITING => 'Новое',
+            self::MAIL_STATUS_SENDED => 'Отправлено',
+            self::MAIL_STATUS_FAILED => 'Ошибка',
+        ];
     }
 
     /**

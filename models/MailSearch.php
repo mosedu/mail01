@@ -19,7 +19,7 @@ class MailSearch extends Mail
     {
         return [
             [['mail_id', 'mail_domen_id', 'mail_status'], 'integer'],
-            [['mail_createtime', 'mail_from', 'mail_fromname', 'mail_to', 'mail_toname', 'mail_text', 'mail_html'], 'safe'],
+            [['mail_createtime', 'mail_from', 'mail_fromname', 'mail_to', 'mail_toname', 'mail_text', 'mail_html', 'mail_mta_id', ], 'safe'],
         ];
     }
 
@@ -42,10 +42,26 @@ class MailSearch extends Mail
     public function search($params)
     {
         $query = Mail::find();
+        $query->with(['domain', 'maillog']);
 
-        $dataProvider = new ActiveDataProvider([
+        $aDataConf = [
             'query' => $query,
-        ]);
+            'sort'=> [
+                'defaultOrder' => isset($params['sort']) ? $params['sort'] : ['mail_createtime' => SORT_DESC, ]
+            ]
+        ];
+
+        if( isset($params['pagesize']) ) {
+            $aDataConf['pagination'] = [
+                'pageSize' => $params['pagesize'],
+            ];
+        }
+
+        $dataProvider = new ActiveDataProvider($aDataConf);
+
+//        $dataProvider = new ActiveDataProvider([
+//            'query' => $query,
+//        ]);
 
         $this->load($params);
 
@@ -67,7 +83,8 @@ class MailSearch extends Mail
             ->andFilterWhere(['like', 'mail_to', $this->mail_to])
             ->andFilterWhere(['like', 'mail_toname', $this->mail_toname])
             ->andFilterWhere(['like', 'mail_text', $this->mail_text])
-            ->andFilterWhere(['like', 'mail_html', $this->mail_html]);
+            ->andFilterWhere(['like', 'mail_html', $this->mail_html])
+            ->andFilterWhere(['like', 'mail_mta_id', $this->mail_mta_id]);
 
         return $dataProvider;
     }

@@ -3,16 +3,16 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Mail;
-use app\models\MailSearch;
+use app\models\Maillog;
+use app\models\MaillogSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * MailController implements the CRUD actions for Mail model.
+ * MaillogController implements the CRUD actions for Maillog model.
  */
-class MailController extends Controller
+class MaillogController extends Controller
 {
     public function behaviors()
     {
@@ -27,12 +27,12 @@ class MailController extends Controller
     }
 
     /**
-     * Lists all Mail models.
+     * Lists all Maillog models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new MailSearch();
+        $searchModel = new MaillogSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -42,8 +42,8 @@ class MailController extends Controller
     }
 
     /**
-     * Displays a single Mail model.
-     * @param string $id
+     * Displays a single Maillog model.
+     * @param integer $id
      * @return mixed
      */
     public function actionView($id)
@@ -54,16 +54,16 @@ class MailController extends Controller
     }
 
     /**
-     * Creates a new Mail model.
+     * Creates a new Maillog model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Mail();
+        $model = new Maillog();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->mail_id]);
+            return $this->redirect(['view', 'id' => $model->mlog_id]);
         } else {
             return $this->render('create', [
                 'model' => $model,
@@ -72,9 +72,9 @@ class MailController extends Controller
     }
 
     /**
-     * Updates an existing Mail model.
+     * Updates an existing Maillog model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param string $id
+     * @param integer $id
      * @return mixed
      */
     public function actionUpdate($id)
@@ -82,7 +82,7 @@ class MailController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->mail_id]);
+            return $this->redirect(['view', 'id' => $model->mlog_id]);
         } else {
             return $this->render('update', [
                 'model' => $model,
@@ -91,44 +91,28 @@ class MailController extends Controller
     }
 
     /**
-     * Deletes an existing Mail model.
+     * Deletes an existing Maillog model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param string $id
+     * @param integer $id
      * @return mixed
      */
     public function actionDelete($id)
     {
-//        $this->findModel($id)->delete();
+        $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
 
     /**
-     * @param string $id
-     * @return mixed
-     */
-    public function actionLog($id)
-    {
-        $model = $this->findModel($id);
-
-        if( Yii::$app->request->isPost ) {
-            return $this->renderAjax('log', ['model' => $model,]);
-        }
-        else {
-            return $this->render('log', ['model' => $model,]);
-        }
-    }
-
-    /**
-     * Finds the Mail model based on its primary key value.
+     * Finds the Maillog model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param string $id
-     * @return Mail the loaded model
+     * @param integer $id
+     * @return Maillog the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Mail::findOne($id)) !== null) {
+        if (($model = Maillog::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
