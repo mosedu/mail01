@@ -19,7 +19,7 @@ class DomainSearch extends Domain
     {
         return [
             [['domain_id', 'domain_status'], 'integer'],
-            [['domain_createtime', 'domain_name'], 'safe'],
+            [['domain_createtime', 'domain_name', 'domain_mailer_id', ], 'safe'],
         ];
     }
 

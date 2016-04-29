@@ -8,6 +8,7 @@ use yii\db\Expression;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\AttributeBehavior;
 use yii\base\Event;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "{{%domain}}".
@@ -20,6 +21,7 @@ use yii\base\Event;
  * @property integer $domain_authkey_updated
  * @property string $domain_mail_from
  * @property string $domain_mail_fromname
+ * @property string $domain_mailer_id
  */
 class Domain extends ActiveRecord
 {
@@ -89,11 +91,11 @@ class Domain extends ActiveRecord
     {
         mb_internal_encoding('UTF-8');
         return [
-            [['domain_name', 'domain_mail_from', ], 'required', ],
+            [['domain_name', 'domain_mailer_id', ], 'required', ], // 'domain_mail_from',
             [['domain_name', 'domain_mail_from', ], 'filter', 'filter' => 'mb_strtolower', ],
             [['domain_name', ], 'unique', ],
             [['domain_mail_from', ], 'email', ],
-            [['domain_name', 'domain_authkey', 'domain_mail_from', 'domain_mail_fromname', ], 'string', 'max' => 255],
+            [['domain_name', 'domain_authkey', 'domain_mail_from', 'domain_mail_fromname', 'domain_mailer_id', ], 'string', 'max' => 255],
             [['domain_name', ], 'match', 'pattern' => '|^[a-zа-яё_][-a-z0-9а-яё_\\.]+\\.[a-zа-яё]+$|u', ],
 
             [['domain_status', ], 'integer', ],
@@ -115,6 +117,7 @@ class Domain extends ActiveRecord
             'domain_authkey_updated' => 'Изменение ключа',
             'domain_mail_from' => 'Email От',
             'domain_mail_fromname' => 'Имя От',
+            'domain_mailer_id' => 'Mailer ID',
         ];
     }
 
@@ -126,6 +129,23 @@ class Domain extends ActiveRecord
             self::DOMAIN_STATUS_ACTIVE => 'Активный',
             self::DOMAIN_STATUS_BLOCKED => 'Заблокирован',
         ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getStatus() {
+        $a = self::getAllStatuses();
+        return isset($a[$this->domain_status]) ? $a[$this->domain_status] : '';
+    }
+
+    /**
+     * @return array
+     */
+    public static function getAllMailers() {
+        $a = Yii::$app->params['servers'];
+        $b = array_map(function($el){ return $el['mailer']['transport']['host']; }, $a);
+        return $b;
     }
 
     /**

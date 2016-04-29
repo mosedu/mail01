@@ -48,9 +48,11 @@ class DomainController extends Controller
      */
     public function actionView($id)
     {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+        return $this->redirect(['index', ]);
+
+//        return $this->render('view', [
+//            'model' => $this->findModel($id),
+//        ]);
     }
 
     /**
@@ -60,15 +62,17 @@ class DomainController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Domain();
+        return $this->actionUpdate();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->domain_id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
-        }
+//        $model = new Domain();
+//
+//        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+//            return $this->redirect(['view', 'id' => $model->domain_id]);
+//        } else {
+//            return $this->render('create', [
+//                'model' => $model,
+//            ]);
+//        }
     }
 
     /**
@@ -77,12 +81,18 @@ class DomainController extends Controller
      * @param integer $id
      * @return mixed
      */
-    public function actionUpdate($id)
+    public function actionUpdate($id = 0)
     {
-        $model = $this->findModel($id);
+        if( $id == 0 ) {
+            $model = new Domain();
+        }
+        else {
+            $model = $this->findModel($id);
+        }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->domain_id]);
+            return $this->redirect(['index', ]);
+//            return $this->redirect(['view', 'id' => $model->domain_id]);
         } else {
             return $this->render('update', [
                 'model' => $model,
@@ -98,7 +108,7 @@ class DomainController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+//        $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
