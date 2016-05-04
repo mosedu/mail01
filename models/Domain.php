@@ -144,8 +144,16 @@ class Domain extends ActiveRecord
      */
     public static function getAllMailers() {
         $a = Yii::$app->params['servers'];
-        $b = array_map(function($el){ return $el['mailer']['transport']['host']; }, $a);
+        $b = array_map(function($el){ return $el['mailer']['transport']['host'] . ' ' . $el['from'] . ' ('.$el['mailer']['transport']['class'].')'; }, $a);
         return $b;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMailer() {
+        $a = Yii::$app->params['servers'];
+        return isset($a[$this->domain_mailer_id]) ? $a[$this->domain_mailer_id] : null;
     }
 
     /**

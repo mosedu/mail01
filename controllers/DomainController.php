@@ -8,6 +8,7 @@ use app\models\DomainSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 
 /**
  * DomainController implements the CRUD actions for Domain model.
@@ -17,6 +18,17 @@ class DomainController extends Controller
     public function behaviors()
     {
         return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'rules' => [
+                    [
+                        'allow' => true,
+//                        'actions' => ['index'],
+                        'roles' => ['@'],
+                    ],
+                ],
+            ],
+
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -111,6 +123,39 @@ class DomainController extends Controller
 //        $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+
+    /**
+     * @param integer $id
+     * @return mixed
+     */
+    public function actionBlock($id)
+    {
+        return $this->setDomainStatus($id, Domain::DOMAIN_STATUS_BLOCKED);
+    }
+
+    /**
+     * @param integer $id
+     * @return mixed
+     */
+    public function actionUnblock($id)
+    {
+        return $this->setDomainStatus($id, Domain::DOMAIN_STATUS_ACTIVE);
+    }
+
+    /**
+     * @param integer $id
+     * @param integer $nStatus
+     * @return mixed
+     */
+    public function setDomainStatus($id, $nStatus)
+    {
+        $model = $this->findModel($id);
+        $model->domain_status = $nStatus;
+        if( !$model->save() ) {
+            Yii::error('Error set domain status ' . print_r($model->getErrors(), true) . ' attributes = ' . print_r($model->attributes, true));
+        }
+        $this->redirect(['index']);
     }
 
     /**

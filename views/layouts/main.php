@@ -67,25 +67,33 @@ $this->registerJs($sJs, View::POS_READY, 'showmodalmessage');
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
-    echo Nav::widget([
-        'options' => ['class' => 'navbar-nav navbar-right'],
-        'items' => [
+
+    $aItems = [];
+
+    if( !Yii::$app->user->isGuest ) {
+        $aItems[] = ['label' => 'Домены', 'url' => ['domain/index']];
+    }
+
+    $aItems[] =
 //            ['label' => 'Home', 'url' => ['/site/index']],
 //            ['label' => 'About', 'url' => ['/site/about']],
 //            ['label' => 'Contact', 'url' => ['/site/contact']],
-            Yii::$app->user->isGuest ? (
-                ['label' => 'Login', 'url' => ['/site/login']]
-            ) : (
-                '<li>'
-                . Html::beginForm(['/site/logout'], 'post')
-                . Html::submitButton(
-                    'Logout (' . Yii::$app->user->identity->username . ')',
-                    ['class' => 'btn btn-link']
-                )
-                . Html::endForm()
-                . '</li>'
+        Yii::$app->user->isGuest ? (
+        ['label' => 'Login', 'url' => ['/site/login']]
+        ) : (
+            '<li>'
+            . Html::beginForm(['/site/logout'], 'post')
+            . Html::submitButton(
+                'Logout (' . Yii::$app->user->identity->username . ')',
+                ['class' => 'btn btn-link']
             )
-        ],
+            . Html::endForm()
+            . '</li>'
+        );
+
+    echo Nav::widget([
+        'options' => ['class' => 'navbar-nav navbar-right'],
+        'items' => $aItems,
     ]);
     NavBar::end();
     ?>
