@@ -163,4 +163,19 @@ class Domain extends ActiveRecord
         $this->domain_authkey = Yii::$app->security->generateRandomString(32) . time();
         $this->domain_authkey_updated = new Expression('NOW()');
     }
+
+    /**
+     * Список доменов, отфильтрованных опционально по статусу
+     *
+     * @param int|null/array $nStatus
+     * @return array
+     */
+    public static function getDomainList($nStatus = self::DOMAIN_STATUS_ACTIVE) {
+        $aWhere = $nStatus === null ? [] : ['domain_status' => $nStatus];
+        return ArrayHelper::map(
+            self::find()->where($aWhere)->all(),
+            'domain_id',
+            'domain_name'
+        );
+    }
 }

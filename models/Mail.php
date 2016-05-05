@@ -208,21 +208,26 @@ class Mail extends ActiveRecord
 
     /**
      * @param Message $oMail
+     * @param array $aMailerConfig
      */
-    public function setMailHeaders(&$oMail) {
+    public function setMailHeaders(&$oMail, $aMailerConfig) {
         $oMsg = $oMail->getSwiftMessage();
         $headers = $oMsg->getHeaders();
 
         $headers->addTextHeader('Precedence', 'bulk');
         $headers->addTextHeader('Auto-Submitted', 'auto-generated');
 
-        $email = $this->domain->domain_mail_from;
+//        $email = $this->domain->domain_mail_from;
+
+        $emailFrom = $aMailerConfig['from'];
+        $emailErr = isset($aMailerConfig['errorto']) ? $aMailerConfig['errorto'] : $aMailerConfig['from'];
         $site = Yii::$app->params['hostname'];
 
-        if( $email !== '' ) {
-            $headers->addTextHeader('Error-to', '<' . $email . '>');
-            $headers->addTextHeader('List-Owner', '<' . $email . '>');
-            $headers->addTextHeader('List-Unsubscribe', '<mailto:' . $email . '>,<http://' . $site .'/unsubscribe/' . $this->mail_id . '>');
+//        if( $email !== '' ) {
+        if( $emailFrom !== '' ) {
+            $headers->addTextHeader('Error-to', '<' . $emailErr . '>');
+            $headers->addTextHeader('List-Owner', '<' . $emailFrom . '>');
+            $headers->addTextHeader('List-Unsubscribe', '<mailto:' . $emailFrom . '>,<http://' . $site .'/unsubscribe/' . $this->mail_id . '>');
         }
 
     }

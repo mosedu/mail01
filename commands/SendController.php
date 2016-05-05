@@ -47,16 +47,35 @@ class SendController extends Controller
             ->all();
 
         // To use the ArrayLogger
-        $logger = new \Swift_Plugins_Loggers_ArrayLogger();
+//        $logger = new \Swift_Plugins_Loggers_ArrayLogger();
         /** @var \Swift_Mailer $oSwiftmailer */
-        $oSwiftmailer = Yii::$app->mailer->getSwiftMailer();
-        $oSwiftmailer->registerPlugin(new \Swift_Plugins_LoggerPlugin($logger));
+//        $oSwiftmailer = Yii::$app->mailer->getSwiftMailer();
+//        $oSwiftmailer->registerPlugin(new \Swift_Plugins_LoggerPlugin($logger));
+
+        $aMailers = [];
+        $aLoggers = [];
+        $aMailersConfig = Yii::$app->params['servers'];
 
         foreach($a As $model) {
             /** @var Mail $model */
             /** @var Message $oMessage */
 
-            $oMessage = Yii::$app->mailer->compose();
+            if( !isset($aMailers[$model->mail_domen_id]) ) {
+                if( empty($model->domain) || !isset($aMailersConfig[$model->domain->domain_mailer_id]) ) {
+                    $sError = 'Not found mailer config for mail ' . print_r($model->attributes, true) . ' domain = ' . print_r(empty($model->domain) ? 'NULL' : $model->domain->attributes, true);
+                    Yii::error($sError);
+                    echo $sError;
+                    continue;
+                }
+                echo 'Create new mailer ['.$model->mail_domen_id.'] ' . print_r($aMailersConfig[$model->domain->domain_mailer_id]['mailer'], true) . "\n";
+                $aMailers[$model->mail_domen_id] = Yii::createObject($aMailersConfig[$model->domain->domain_mailer_id]['mailer']);
+                $aLoggers[$model->mail_domen_id] = new \Swift_Plugins_Loggers_ArrayLogger();
+                $oSwiftmailer = $aMailers[$model->mail_domen_id]->getSwiftMailer();
+                $oSwiftmailer->registerPlugin(new \Swift_Plugins_LoggerPlugin($aLoggers[$model->mail_domen_id]));
+            }
+
+//            $oMessage = Yii::$app->mailer->compose();
+            $oMessage = $aMailers[$model->mail_domen_id]->compose();
 
             $oMessage
                 ->setFrom(empty($model->mail_fromname) ? $model->mail_from : [$model->mail_from => $model->mail_fromname])
@@ -67,6 +86,7 @@ class SendController extends Controller
             $headers = $oMsg->getHeaders();
 
             $headers->addTextHeader('X-Document-Id', $model->mail_id);
+            $headers->addTextHeader('Return-Path', $model->mail_from);
 
             if( !empty($model->headers) ) {
                 $aDopHeaders = $model->headers->getHeaderValue();
@@ -75,7 +95,7 @@ class SendController extends Controller
                 }
             }
 
-            $model->setMailHeaders($oMessage);
+            $model->setMailHeaders($oMessage, $aMailersConfig[$model->domain->domain_mailer_id]);
 
             if( !empty($model->mail_html) ) {
                 $oMessage->setHtmlBody($model->mail_html);
@@ -89,22 +109,34 @@ class SendController extends Controller
             $model->mail_send_try += 1;
             $model->mail_send_last_try = new Expression('NOW()');
 
-            if( $oMessage->send() ) {
-                // если все отправилось, то ставим флажек отправки
+            try {
+                $bSend = $oMessage->send();
+                $sErrMsg = '';
+            }
+            catch(\Exception $e ) {
+                $bSend = false;
+                $sErrMsg = $e->getMessage() . ' ['.$e->getCode().']';
+                echo "Error send mail using {$model->domain->domain_mailer_id} : " . $sErrMsg . "\n";
+            }
+
+            if( $bSend ) {
+                // если все отправилось, то ставим флажок отправки
                 $model->mail_status = Mail::MAIL_STATUS_SENDED;
                 echo "Send mail to " . $model->mail_to . " [{$model->mail_id}]\n";
             }
             else if( $model->mail_send_try >= self::MAX_MAIL_SEND_TRY ) {
                 // если кол-во попыток достигло максимального - ставим флаг фейла
                 $model->mail_status = Mail::MAIL_STATUS_FAILED;
-                echo "Fail mail to " . $model->mail_to . " [{$model->mail_id}]\n";
+                echo "Fail mail to " . $model->mail_to . " [{$model->mail_id}] tries = {$model->mail_send_try}\n";
             }
 
-            $sLog = $logger->dump();
-            $logger->clear();
-            //
+            $sLog = $aLoggers[$model->mail_domen_id]->dump() . (!empty($sErrMsg) ? ("\nException message: " . $sErrMsg) : '');
+            $aLoggers[$model->mail_domen_id]->clear();
+//            $sLog = $logger->dump();
+//            $logger->clear();
 
-            if( preg_match('|queued\s+as\s+\b([a-f0-9]+)\b|mi', $sLog, $a) ) {
+//            if( preg_match('|queued.+as\s+\b([a-f0-9]+)\b|mi', $sLog, $a) ) {
+            if( preg_match('|queued.+\\bas\\s+\\b([^\\b]+)\\b|mi', $sLog, $a) ) {
                 $model->mail_mta_id = $a[1];
             }
 
@@ -153,11 +185,62 @@ class SendController extends Controller
 << 250 2.0.0 Ok: queued as F011A1811A3
 EOT;
 
-        if( preg_match('|queued\s+as\s+\b([a-f0-9]+)\b|mi', $sLog, $a) ) {
-            echo "Matched: {$a[1]}\n";
+        $sLog1 = <<<EOT
+++ Starting Swift_SmtpTransport
+<< 220 smtp2m.mail.yandex.net ESMTP (Want to use Yandex.Mail for your domain? Visit http://pdd.yandex.ru)
+
+>> EHLO [127.0.0.1]
+
+<< 250-smtp2m.mail.yandex.net
+250-8BITMIME
+250-PIPELINING
+250-SIZE 42991616
+250-AUTH LOGIN PLAIN XOAUTH2
+250-DSN
+250 ENHANCEDSTATUSCODES
+
+>> AUTH LOGIN
+
+<< 334 VXNlcm5hbWU6
+
+>> YWN0aW9uLnJlZw==
+
+<< 334 UGFzc3dvcmQ6
+
+>> UWF6c0U0UmZ2Z1k3
+
+<< 235 2.7.0 Authentication successful.
+
+++ Swift_SmtpTransport started
+>> MAIL FROM:<action.reg@yandex.ru>
+
+<< 250 2.1.0 <action.reg@yandex.ru> ok
+
+>> RCPT TO:<KozminVA@edu.mos.ru>
+
+<< 250 2.1.5 <KozminVA@edu.mos.ru> recipient ok
+
+>> DATA
+
+<< 354 Enter mail, end with "." on a line by itself
+
+>>
+.
+
+<< 250 2.0.0 Ok: queued on smtp2m.mail.yandex.net as 1462452243-FOT9J2j3Gv-i3ZaBjQX
+EOT;
+
+        if( preg_match('|queued.+\\bas\\s+\\b([^\\b]+)\\b|mi', $sLog, $a) ) {
+            echo "sLog Matched: {$a[1]}\n";
         }
         else {
-            echo "Not Matched\n";
+            echo "sLog Not Matched\n";
+        }
+        if( preg_match('|queued.+\\bas\\s+\\b([^\\b]+)\\b|mi', $sLog1, $a) ) {
+            echo "sLog1 Matched: {$a[1]}\n";
+        }
+        else {
+            echo "sLog1 Not Matched\n";
         }
     }
 

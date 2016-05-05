@@ -61,7 +61,7 @@ $this->registerJs($sJs, View::POS_READY, 'showmodalmessage');
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => 'My Company',
+        'brandLabel' => 'Mail gate',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
@@ -72,6 +72,7 @@ $this->registerJs($sJs, View::POS_READY, 'showmodalmessage');
 
     if( !Yii::$app->user->isGuest ) {
         $aItems[] = ['label' => 'Домены', 'url' => ['domain/index']];
+        $aItems[] = ['label' => 'Письма', 'url' => ['mail/index']];
     }
 
     $aItems[] =
@@ -108,9 +109,9 @@ $this->registerJs($sJs, View::POS_READY, 'showmodalmessage');
 
 <footer class="footer">
     <div class="container">
-        <p class="pull-left">&copy; My Company <?= date('Y') ?></p>
+        <p class="pull-left">&copy; Mail gate <?= date('Y') ?></p>
 
-        <p class="pull-right"><?= Yii::powered() ?></p>
+        <p class="pull-right"><?= '' // Yii::powered() ?></p>
     </div>
 </footer>
 

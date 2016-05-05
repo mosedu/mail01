@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     /** @var $model app\models\Domain */
                     return Html::encode($model->domain_name)
                         . '<br />'
-                        . '<span style="color: #cccccc;">'
+                        . '<span style="color: #cccccc; font-size: 0.8em;">'
                         . Html::encode($model->domain_authkey)
                         . '</span>';
                 },

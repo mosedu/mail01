@@ -16,9 +16,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <!-- p>
-        <?= '' // Html::a('Create Mail', ['create'], ['class' => 'btn btn-success']) ?>
-    </p -->
+    <p>
+        <?= Html::a('Ручная отправка письма', ['manualform'], ['class' => 'btn btn-success showinmodal', 'title' => 'Ручная отправка']) ?>
+    </p>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -38,7 +38,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         . '<br />'
                         . $model->domain->domain_name
                         . ' '
-                        . $model->getStatus();
+                        . $model->getStatus()
+                        . (($model->mail_status == \app\models\Mail::MAIL_STATUS_WAITING) && ($model->mail_send_try > 0) ? (' !! ['.$model->mail_send_try.']') : '');
                 },
             ],
 
@@ -49,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function ($model, $key, $index, $column) {
                     /** @var $model app\models\Mail */
                     return Html::encode($model->mail_from)
-                        . (empty($model->mail_fromname) ? '' : ('<br />' . Html::encode($model->mail_fromname)));
+                        . (!empty($model->mail_fromname) && ($model->mail_fromname != $model->mail_from) ? ('<br />' . Html::encode($model->mail_fromname)) : '');
                 },
             ],
 
@@ -60,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function ($model, $key, $index, $column) {
                     /** @var $model app\models\Mail */
                     return Html::encode($model->mail_to)
-                        . (empty($model->mail_toname) ? '' : ('<br />' . Html::encode($model->mail_toname)));
+                        . (!empty($model->mail_toname) && ($model->mail_toname != $model->mail_to) ? ('<br />' . Html::encode($model->mail_toname)) : '');
                 },
             ],
 
