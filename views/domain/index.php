@@ -28,15 +28,30 @@ $this->params['breadcrumbs'][] = $this->title;
 
 //            'domain_id',
 //            'domain_createtime',
-            'domain_name',
+//            'domain_name',
 //            'domain_status',
+            [
+                'class' => 'yii\grid\DataColumn',
+                'attribute' => 'domain_name',
+//                'filter' => Domain::getAllStatuses(),
+                'format' => 'raw',
+                'value' => function ($model, $key, $index, $column) {
+                    /** @var $model app\models\Domain */
+                    return Html::encode($model->domain_name)
+                        . '<br />'
+                        . '<span style="color: #cccccc;">'
+                        . Html::encode($model->domain_authkey)
+                        . '</span>';
+                },
+            ],
+
             [
                 'class' => 'yii\grid\DataColumn',
                 'attribute' => 'domain_status',
                 'filter' => Domain::getAllStatuses(),
                 'format' => 'raw',
                 'value' => function ($model, $key, $index, $column) {
-                    /** @var $model app\models\Mail */
+                    /** @var $model app\models\Domain */
                     return Html::encode($model->getStatus());
                 },
             ],
