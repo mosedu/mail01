@@ -15,6 +15,8 @@ use yii\db\Expression;
 use app\models\Mail;
 use app\models\Maillog;
 
+use app\components\MailgateAdapter;
+
 /**
  *
  */
@@ -95,6 +97,7 @@ class SendController extends Controller
                 }
             }
 
+            // Тут добавляем заголовки к письму
             $model->setMailHeaders($oMessage, $aMailersConfig[$model->domain->domain_mailer_id]);
 
             if( !empty($model->mail_html) ) {
@@ -269,5 +272,36 @@ Apr 28 13:10:00 mx2 postfix/qmgr[1483]: F011A1811A3: from=<mail@active.ru>, size
 Apr 28 13:10:00 mx2 postfix/smtp[29999]: F011A1811A3: to=<devedumos@gmail.com>, relay=gmail-smtp-in.l.google.com[173.194.222.27]:25, delay=0.77, delays=0.16/0/0.27/0.33, dsn=2.0.0, status=sent (250 2.0.0 OK 1461838200 i75si4479842lfg.110 - gsmtp)
 Apr 28 13:10:00 mx2 postfix/qmgr[1483]: F011A1811A3: removed
 */
+    }
+
+    public function actionAdapter() {
+        $o = new MailgateAdapter();
+        $aRet = $o->send([
+            'domainkey' => 'apikey-active',
+            'to' => 'KozminVA@edu.mos.ru',
+            'toname' => 'Vitechke',
+            'fromname' => 'Hard core comp',
+            'subject' => 'Письмо из коммандной строки',
+            'text' => 'Простой текст' . "\n\n" . 'В несколько строк' . "\n\n" . 'Спасибо за внимание' . "\n",
+        ]);
+
+        echo "\n" . print_r($aRet, true) . "\n";
+//        $o->setUrl('http://yandex.ru?text=aabbcc&page=3')
+//            ->setMethod('get')
+//            ->addData(['site' => 'google.ru', 'redirect' => 'no',])
+//            ->prepareRequest();
+//
+//        $o = new MailgateAdapter();
+//        $o->setUrl('http://yandex.ru?text=aabbcc&page=3')
+//            ->setMethod('post')
+//            ->addData(['site' => 'google.ru', 'redirect' => 'no',])
+//            ->setTumeout(2)
+//            ->setUseragent('Mozilla/5.2-MS-Windows')
+//            ->addHeader([
+//                'Content-type' => 'application/x-www-form-urlencoded',
+//                'Accept' => 'application/json; q=1.0, */*; q=0.1',
+//            ])
+//            ->prepareRequest();
+
     }
 }

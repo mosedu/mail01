@@ -23,7 +23,8 @@ class MailController extends ActiveController
                 'mail_domen_id' => 'domain_id',
                 'mail_from' => function($domain, $param) {
                     $aDomainData = isset(Yii::$app->params['servers'][$domain->domain_mailer_id]) ? Yii::$app->params['servers'][$domain->domain_mailer_id] : null ;
-                    return isset($param['mail_from']) ? $param['mail_from'] : ($aDomainData !== null ? $aDomainData['from'] : '');
+                    return $aDomainData !== null ? $aDomainData['from'] : '';
+//                    return isset($param['mail_from']) ? $param['mail_from'] : ($aDomainData !== null ? $aDomainData['from'] : '');
                 },
                 'mail_fromname' => function($domain, $param) {
                     $aDomainData = isset(Yii::$app->params['servers'][$domain->domain_mailer_id]) ? Yii::$app->params['servers'][$domain->domain_mailer_id] : null ;
